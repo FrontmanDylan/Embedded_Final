@@ -85,11 +85,28 @@ void loop(){
       if (client.available()) {             // if there's bytes to read from the client,
 
 
-      //ANALOG LDR//
+      
+        
+        char c = client.read();             // read a byte, then
+        Serial.write(c);                    // print it out the serial monitor
+        header += c;
+        if (c == '\n') {                    // if the byte is a newline character
+          
+          // if the current line is blank, you got two newline characters in a row.
+          // that's the end of the client HTTP request, so send a response:
+          if (currentLine.length() == 0) {
+            // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
+            // and a content-type so the client knows what's coming, then a blank line:
+            client.println("HTTP/1.1 200 OK");
+            client.println("Content-type:text/html");
+            client.println("Connection: close");
+            client.println();
+
+            //ANALOG LDR//
   
       // read the analog / millivolts value for pin 0:
-      int analogValue = analogRead(0);
-      int analogVolts = analogReadMilliVolts(0);
+      int analogValue = analogRead(34);
+      int analogVolts = analogReadMilliVolts(34);
       
       // rate out the values you read:
       if (analogVolts >= 2600){
@@ -101,20 +118,6 @@ void loop(){
       else{
         brightness = String("dark");
       }
-        
-        char c = client.read();             // read a byte, then
-        Serial.write(c);                    // print it out the serial monitor
-        header += c;
-        if (c == '\n') {                    // if the byte is a newline character
-          // if the current line is blank, you got two newline characters in a row.
-          // that's the end of the client HTTP request, so send a response:
-          if (currentLine.length() == 0) {
-            // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
-            // and a content-type so the client knows what's coming, then a blank line:
-            client.println("HTTP/1.1 200 OK");
-            client.println("Content-type:text/html");
-            client.println("Connection: close");
-            client.println();
             
             // Display the HTML web page
             client.println("<!DOCTYPE html><html>");
@@ -130,7 +133,7 @@ void loop(){
             client.println(".sensor { color:white; font-weight: bold; background-color: #bcbcbc; padding: 1px; }");
             
             // Web Page Heading
-            client.println("</style></head><body><h1>ESP32 with BME280</h1>");
+            client.println("</style></head><body><h1>We Love Prof Naher :)</h1>");
             client.println("<table><tr><th>MEASUREMENT</th><th>VALUE</th></tr>");
             client.println("<tr><td>Temp. Celsius</td><td><span class=\"sensor\">");
             client.println(bme.readTemperature());
@@ -140,15 +143,12 @@ void loop(){
             client.println(" *F</span></td></tr>");       
             client.println("<tr><td>Pressure</td><td><span class=\"sensor\">");
             client.println(bme.readPressure() / 100.0F);
-            client.println(" hPa</span></td></tr>");
-            client.println("<tr><td>Approx. Altitude</td><td><span class=\"sensor\">");
-            client.println(bme.readAltitude(SEALEVELPRESSURE_HPA));
-            client.println(" m</span></td></tr>"); 
+            client.println(" hPa</span></td></tr>"); 
             client.println("<tr><td>Humidity</td><td><span class=\"sensor\">");
             client.println(bme.readHumidity());
             client.println(" %</span></td></tr>"); 
             client.println("<tr><td>Light</td><td><span class=\"sensor\">");
-            client.println(analogVolts);
+            client.println(String(brightness));
             client.println("</span></td></tr>");
             client.println("</body></html>");
             
